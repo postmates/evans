@@ -1,0 +1,16 @@
+[package]
+name = "evans"
+version = "0.1.0"
+authors = ["Brian L. Troutwine <blt@postmates.com>"]
+
+[[bin]]
+name = "evans"
+doc = false
+
+[dependencies]
+protobuf = "1.0"
+clap = "2.10"
+rand = "0.3"
+lazy_static = "0.2"
+chrono = "0.2"
+byteorder = "0.5"

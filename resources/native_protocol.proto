@@ -1,0 +1,32 @@
+syntax = "proto2";
+
+package com.postmates.cernan;
+option java_package = "com.postmates.cernan";
+
+enum AggregationMethod {
+  WINDOW_COUNT  = 1;  // counter 
+  SET_OR_RESET  = 2;  // gauge / raw 
+  SUMMARIZE     = 3; // quantiles | histogram / timer 
+  MONOTONIC_ADD = 4; // delta_gauge 
+}
+
+message Telemetry {
+  optional string name = 1;
+  repeated double samples = 2 [packed=true];
+  optional AggregationMethod method = 3 [ default = SET_OR_RESET ];
+  map<string, string> metadata = 4;
+  optional int64     timestamp_ms = 5;
+}
+
+message LogLine {
+  optional string path = 1;
+  optional string value = 2;
+  map<string, string> metadata = 3;
+  optional int64 timestamp_ms = 4;
+}
+
+message Payload {
+
+  repeated Telemetry points = 2;
+  repeated LogLine lines = 3;
+}
