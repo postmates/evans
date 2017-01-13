@@ -5,13 +5,12 @@
 ![Ron Evans, Apollo 17 EVA](257771main_as17-152-23393_full.jpg)
 
 Evans is a companion tool to [cernan](https://github.com/postmates/cernan) but
-is generally useful for sending randomized data into servers that implement:
+is generally useful for sending randomized data into servers that implement the
+following protocols:
 
   * statsd
   * graphite
   * cernan native
-  
-protocols. 
 
 # Usage 
 
