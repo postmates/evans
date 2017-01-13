@@ -1,6 +1,6 @@
 # evans - random telemetry fuzzing tool
 
-[![Build Status]()]()
+[![Build Status](https://travis-ci.org/postmates/evans.svg?branch=master)](https://travis-ci.org/postmates/evans) 
 
 ![Ron Evans, Apollo 17 EVA](257771main_as17-152-23393_full.jpg)
 
