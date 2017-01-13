@@ -6,11 +6,14 @@ use evans::generators::Generator;
 use std::str::FromStr;
 use std::thread;
 
+const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
+
 fn main() {
-    let matches = App::new("My Super Program")
-        .version("1.0")
-        .author("Kevin K. <kbknapp@gmail.com>")
-        .about("Does awesome things")
+    let matches = App::new("evans")
+        .version(VERSION.unwrap_or("unknown"))
+        .version("0.1")
+        .author("Brian L. Troutwine <blt@postmates.com>")
+        .about("fuzz generation for telemetry servers")
         .arg(Arg::with_name("host")
             .long("host")
             .value_name("HOST")
