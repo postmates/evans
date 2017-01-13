@@ -66,8 +66,8 @@ fn main() {
     let enable_graphite = matches.is_present("graphite");
     let enable_statsd = matches.is_present("statsd");
     let enable_native = matches.is_present("native");
-    let graphite_port = u16::from_str(matches.value_of("graphite_port").unwrap_or("2004")).unwrap();
-    let statsd_port = u16::from_str(matches.value_of("statsd_port").unwrap_or("2004")).unwrap();
+    let graphite_port = u16::from_str(matches.value_of("graphite_port").unwrap_or("2003")).unwrap();
+    let statsd_port = u16::from_str(matches.value_of("statsd_port").unwrap_or("8125")).unwrap();
     let native_port = u16::from_str(matches.value_of("native_port").unwrap_or("1972")).unwrap();
     let hertz = u16::from_str(matches.value_of("hertz").unwrap_or("1")).unwrap();
 
