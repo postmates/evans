@@ -2,12 +2,12 @@ use byteorder::{BigEndian, ByteOrder};
 use generators::Generator;
 use protobuf::Message;
 use protobuf::repeated::RepeatedField;
-use protobuf::stream::CodedOutputStream;
 use protocols::native::{AggregationMethod, LogLine, LogLine_MetadataEntry, Payload, Telemetry,
                         Telemetry_MetadataEntry};
 use rand;
 use rand::Rng;
 use std::io::BufWriter;
+use std::io::Write;
 use std::net;
 use std::net::{TcpStream, ToSocketAddrs};
 use time;
@@ -26,10 +26,8 @@ impl Native {
 static ASCII_LOWER: [char; 26] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
                                   'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
-static AGGR_METHODS: [AggregationMethod; 4] = [AggregationMethod::WINDOW_COUNT,
-                                               AggregationMethod::SET_OR_RESET,
-                                               AggregationMethod::SUMMARIZE,
-                                               AggregationMethod::MONOTONIC_ADD];
+static AGGR_METHODS: [AggregationMethod; 3] =
+    [AggregationMethod::SET, AggregationMethod::SUM, AggregationMethod::SUMMARIZE];
 
 static META_KEYS: [&'static str; 4] = ["one", "two", "three", "four"];
 
@@ -39,7 +37,7 @@ impl Generator for Native {
     fn run(&self, hertz: u16) -> () {
         let mut rng = rand::thread_rng();
         let mut bufwrite = BufWriter::new(TcpStream::connect(self.addr).unwrap());
-        let mut stream = CodedOutputStream::new(&mut bufwrite);
+        let mut sz_buf = [0; 4];
 
         let mut name_cache: Vec<String> = Vec::new();
         for a in &ASCII_LOWER {
@@ -49,12 +47,12 @@ impl Generator for Native {
                 }
             }
         }
-        let mut sz_buf = [0; 4];
 
         loop {
+            let mut pyld = Payload::new();
+
             let mut points = Vec::with_capacity(1024);
-            let top = rng.gen_range::<usize>(0, 100);
-            for _ in 0..top {
+            for _ in 0..rng.gen_range::<usize>(0, 100) {
                 let mut telem = Telemetry::new();
                 telem.set_name(rng.choose(&name_cache).unwrap().to_string());
                 let smpl_top = rng.gen_range::<usize>(0, 10);
@@ -72,18 +70,20 @@ impl Generator for Native {
                     tm.set_value(rng.choose(&META_VALS).unwrap().to_string());
                     metadata.push(tm);
                 }
+                if rng.gen::<bool>() {
+                    telem.set_persisted(true);
+                }
                 telem.set_timestamp_ms(time::now() * 1000);
                 telem.set_metadata(RepeatedField::from_vec(metadata));
                 points.push(telem);
             }
 
-            let mut pyld = Payload::new();
             pyld.set_points(RepeatedField::from_vec(points));
 
             let pyld_len = pyld.compute_size();
             BigEndian::write_u32(&mut sz_buf, pyld_len);
-            stream.write_raw_bytes(&sz_buf).unwrap();
-            pyld.write_to_with_cached_sizes(&mut stream).unwrap();
+            bufwrite.write(&sz_buf).unwrap();
+            pyld.write_to_writer(&mut bufwrite).unwrap();
 
             time::sleep_hertz(hertz);
         }
